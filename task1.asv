@@ -1,0 +1,18 @@
+PARTA=MDS(D);
+PARTB=SAMPLE_MDS(D,3);
+
+sizeOfD = size(D,1);
+
+for n=1:sizeOfD
+    for m=1:sizeOfD
+        if n == m
+            continue
+        end
+        
+        a = PARTA(n)
+        straight_line_distance = 
+    end
+end
+drender(PARTA, 'red');
+hold on;
+drender(PARTB, 'blue');
