@@ -3,7 +3,6 @@ function accuracy=LRC(X,c)
     % X contains the data vectors, c contains the classes
     
     SizeOfX = size(X,2);
-
     theta = zeros(SizeOfX);
     
     [loss,gradient] = Grad_Descent([], [], theta, 0.0002);
