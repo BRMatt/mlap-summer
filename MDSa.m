@@ -1,4 +1,4 @@
-function XMDS = MDS( D )
+function XMDS = MDSa( D )
     % Compute the Multidimensional scaling from the distance matrix D.
     % D contains distances, not squared distances
     
@@ -7,14 +7,15 @@ function XMDS = MDS( D )
     
     SizeOfD = size(D, 1);
     
-    I = eye(SizeOfD);
-    J = ones(SizeOfD,SizeOfD);
     
-    K = -0.5 * (I - (J / SizeOfD)) * D * (I - (J / SizeOfD));
+    % Add the constant to the kernel matrix
+    K = KERNEL(D);
+    [U,L] = eig(K);
+    SmallestValue = min(L);
+    Application = ((-eye(SizeOfD)) + 1) .* SmallestValue;
+    D = D + Application;
     
-    % Not perfectly symmetrical due to rounding errors etc., average them to provide symmetric values
-    K = (K + K') ./ 2;
-    
+    K = Kernel(D);
     [U,L] = eig(K);
     
     % eig() returns the eigenvalues with the smallest 3 first, this
@@ -24,11 +25,8 @@ function XMDS = MDS( D )
     U=U(:,SizeOfD:-1:1);
     
     % For task 2
-    plot(1:,L,'red');
-    
-    % Get rid of any negative values so we can sqrt
-    L=max(0,L);
-    
+    % plot(1:SizeOfD,L,'red');
+        
     XMDS = U * sqrt(L);
     XMDS=XMDS(:,1:3);
 end

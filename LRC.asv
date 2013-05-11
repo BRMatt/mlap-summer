@@ -1,12 +1,52 @@
-function accuracy=LRC(X,c)
+function accuracy=LRC(XData,classes)
     % Compute the classification accuracy using a logistic regression classifier.
     % X contains the data vectors, c contains the classes
     
-    SizeOfX = size(X,2);
-    theta = zeros(SizeOfX);
+    SizeOfX = size(XData,1);
+    TestDataSize = SizeOfX / 2;
     
-    [loss,gradient] = Grad_Descent([], [], theta, 0.0002);
+    Theta = zeros(5,3);
+    
+    % Generate the set of /t/est data we want to use
+    t = randperm(SizeOfX, TestDataSize);
+    TestD = XData(t,:);
+    TestC = classes(t);
+    
+    % Generate the set of /r/eal data
+    r = setdiff(t, range(SizeOfX));
+    RealD = XData(r,:);
+    RealC = classes(r);
+    
+    params = fminunc(@NegativeLogLikelihood, Theta);
+
     
     
+    function f = NegativeLogLikelihood(T)
+        f = 0;
+        
+        for i=1:TestDataSize
+            X = TestD(i,:);
+            c = TestC(i);
+            
+            %vt = v .* LocalTheta;
+                        
+            % The data applied to the parameter vector for its class
+            vtc = X * T(c,:)';
+            
+            xo = [
+              X * T(1,:)';
+              X * T(2,:)';
+              X * T(3,:)';
+              X * T(4,:)';
+              X * T(5,:)';
+            ];
+            
+            lse = log(sum(exp(xo)));
+            
+            f = f + (vtc - lse);
+        end
+        
+        f = -f;
+    end
 end
 

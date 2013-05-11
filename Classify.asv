@@ -1,0 +1,10 @@
+function [ c ] = Classify( X, C, T)
+% Soft-Classify a data vector, X, given classes C, and their parameters, T
+
+    Xset = repmat(X,5,1);
+
+    e = exp(Xset * T');
+    e = e(
+    c = e/sum(e);
+end
+
