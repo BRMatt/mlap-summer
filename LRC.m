@@ -1,37 +1,34 @@
-function accuracy=LRC(XData,classes)
+function accuracy=LRC(allXData,classesForX)
     % Compute the classification accuracy using a logistic regression classifier.
     % X contains the data vectors, c contains the classes
     
-    SizeOfX = size(XData,1);
-    TestDataSize = SizeOfX / 2;
+    sizeOfX = size(allXData,1);
+    testDataSize = sizeOfX / 2;
     
     Theta = zeros(5,3);
     
-    % Generate the set of /t/est data we want to use
-    t = randperm(SizeOfX, TestDataSize);
-    TestD = XData(t,:);
-    TestC = classes(t);
+    ordering = randperm(sizeOfX);
     
-    % Generate the set of /r/eal data
-    r = setdiff(t, range(SizeOfX));
-    RealD = XData(r,:);
-    RealC = classes(r);
+    trainingIndexes = ordering(1:testDataSize);
+    realIndexes     = ordering(testDataSize + 1:sizeOfX);
     
     params = fminunc(@NegativeLogLikelihood, Theta);
 
     good = 0;
     bad  = 0;
     
-    for j=1:TestDataSize
-       x = RealD(j,:);
+    for j=1:testDataSize
+       realI = realIndexes(j);
        
-       prob = Classify(x,classes,params);
+       x = allXData(realI,:);
        
-       [p,index] = max(prob);
+       prob = Classify(x,classesForX,params);
+
+       [~,index] = max(prob);
               
-       c = classes(index);
+       c = classesForX(index);
        
-       if c == RealC(j)
+       if c == classesForX(realI)
            good = good + 1;
        else
            bad = bad + 1;
@@ -41,7 +38,7 @@ function accuracy=LRC(XData,classes)
     good
     bad
     
-    good/(good + bad)
+    accuracy = good/(good + bad);
     
     function [ c ] = Classify( X, C, T)
         % Soft-Classify a data vector, X, given classes C, and their parameters, T
@@ -52,18 +49,19 @@ function accuracy=LRC(XData,classes)
 
     
     function f = NegativeLogLikelihood(T)
+        % T is the vector of theta parameters
         f = 0;
         
-        for i=1:TestDataSize
-            X = TestD(i,:);
-            c = TestC(i);
+        for i=1:testDataSize
+            X = allXData(trainingIndexes(i),:);
+            c = classesForX(trainingIndexes(i));
                         
             % The data applied to the parameter vector for its class
             data_class_theta = X * T(c,:)';
             
-            xo = X * T';
+            data_by_params = X * T';
             
-            lse = log(sum(exp(xo)));
+            lse = log(sum(exp(data_by_params)));
             
             f = f + (data_class_theta - lse);
         end

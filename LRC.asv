@@ -7,43 +7,63 @@ function accuracy=LRC(XData,classes)
     
     Theta = zeros(5,3);
     
-    % Generate the set of /t/est data we want to use
-    t = randperm(SizeOfX, TestDataSize);
-    TestD = XData(t,:);
-    TestC = classes(t);
+    ordering = randperm(SizeOfX);
     
-    % Generate the set of /r/eal data
-    r = setdiff(t, range(SizeOfX));
-    RealD = XData(r,:);
-    RealC = classes(r);
+    trainingIndexes = ordering(1:TestDataSize);
+    realIndexes     = ordering(TestDataSize + 1:SizeOfX);
     
     params = fminunc(@NegativeLogLikelihood, Theta);
 
+    good = 0;
+    bad  = 0;
     
+    for j=1:TestDataSize
+       realI = realIndexes(j);
+       
+       x = XData(realI,:);
+       
+       prob = Classify(x,classes,params);
+
+       [~,index] = max(prob);
+              
+       c = classes(index);
+       
+       if c == RealC(j)
+           good = good + 1;
+       else
+           bad = bad + 1;
+       end
+    end
+    
+    good
+    bad
+    
+    accuracy = good/(good + bad);
+    
+    function [ c ] = Classify( X, C, T)
+        % Soft-Classify a data vector, X, given classes C, and their parameters, T
+
+        e = exp(X * T');
+        c = e/sum(e);
+    end
+
     
     function f = NegativeLogLikelihood(T)
+        % T is the vector of theta parameters
         f = 0;
         
         for i=1:TestDataSize
-            X = TestD(i,:);
-            c = TestC(i);
-            
-            %vt = v .* LocalTheta;
+            X = TrainingD(i,:);
+            c = TrainingC(i);
                         
             % The data applied to the parameter vector for its class
-            vtc = X * T(c,:)';
+            data_class_theta = X * T(c,:)';
             
-            xo = [
-              X * T(1,:)';
-              X * T(2,:)';
-              X * T(3,:)';
-              X * T(4,:)';
-              X * T(5,:)';
-            ];
+            data_by_params = X * T';
             
-            lse = log(sum(exp(xo)));
+            lse = log(sum(exp(data_by_params)));
             
-            f = f + (vtc - lse);
+            f = f + (data_class_theta - lse);
         end
         
         f = -f;
