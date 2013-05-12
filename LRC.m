@@ -22,11 +22,9 @@ function accuracy=LRC(allXData,classesForX)
        
        x = allXData(realI,:);
        
-       prob = Classify(x,classesForX,params);
+       prob = Classify(x,params);
 
-       [~,index] = max(prob);
-              
-       c = classesForX(index);
+       [~,c] = max(prob);
        
        if c == classesForX(realI)
            good = good + 1;
@@ -35,12 +33,9 @@ function accuracy=LRC(allXData,classesForX)
        end
     end
     
-    good
-    bad
-    
     accuracy = good/(good + bad);
     
-    function [ c ] = Classify( X, C, T)
+    function [ c ] = Classify( X, T)
         % Soft-Classify a data vector, X, given classes C, and their parameters, T
 
         e = exp(X * T');
